@@ -68,6 +68,8 @@ class Machine:
             History(tapes=samples)
         )
 
+        lspan, scan, rspan = tape
+
         marks = 0
 
         while True:
@@ -140,10 +142,6 @@ class Machine:
 
             # Machine operation ####################
 
-            # pylint: disable = protected-access
-
-            scan = tape._list[tape._pos]
-
             try:
                 color, shift, state = prog[state][scan]
             except TypeError:
@@ -161,32 +159,29 @@ class Machine:
                 if scan:
                     marks -= 1
 
-            tape._list[tape._pos] = color
-
             if shift:
-                tape.head += 1
-                tape._pos  += 1
+                # push new color to the left
+                lspan.append(color)
 
+                # pull next color from the right
                 try:
-                    tape._list[tape._pos]
+                    scan = rspan.pop()
                 except IndexError:
-                    tape._list.append(0)
-                    tape.rspan += 1
+                    scan = 0
+
             else:
-                if tape.head + tape._init == 0:
-                    tape._list.insert(0, 0)
-                    tape._init += 1
-                    tape._pos  += 1
-                    tape.lspan -= 1
+                # push new color to the right
+                rspan.append(color)
 
-                tape.head -= 1
-                tape._pos  -= 1
-
-            # pylint: enable = protected-access
+                # pull next color from the left
+                try:
+                    scan = lspan.pop()
+                except IndexError:
+                    scan = 0
 
             # End of main loop #####################
 
-        self._tape = tape
+        self._tape = lspan, scan, rspan
         self._steps = step
 
         self._marks = marks
