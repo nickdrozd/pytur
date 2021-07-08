@@ -155,82 +155,66 @@ class Machine:
                 else:
                     marked = 0
 
-            stepped = 0
-
-            init_scan = scan
-
-            side = rspan if shift else lspan
-
-            while scan == init_scan:
-                if shift:
-                    # push new color to the left
-                    try:
-                        block = lspan[-1]
-                    except IndexError:
-                        lspan.append([color, 1])
-                    else:
-                        if block[0] == color:
-                            block[1] += 1
-                        else:
-                            lspan.append([color, 1])
-
-                    # pull next color from the right
-                    try:
-                        block = rspan[-1]
-                    except IndexError:
-                        scan = 0
-                    else:
-                        scan = block[0]
-
-                        if block[1] < 2:
-                            rspan.pop()
-                        else:
-                            block[1] -= 1
-
-                    head += 1
-
-                else:
-                    # push new color to the right
-                    try:
-                        block = rspan[-1]
-                    except IndexError:
-                        rspan.append([color, 1])
-                    else:
-                        if block[0] == color:
-                            block[1] += 1
-                        else:
-                            rspan.append([color, 1])
-
-                    # pull next color from the left
-                    try:
-                        block = lspan[-1]
-                    except IndexError:
-                        scan = 0
-                    else:
-                        scan = block[0]
-
-                        if block[1] < 2:
-                            lspan.pop()
-                        else:
-                            block[1] -= 1
-
-                    if head + init == 0:
-                        init += 1
-
-                    head -= 1
-
-                stepped += 1
-
-                if state != next_state:
-                    break
-
+            if shift:
+                # push new color to the left
                 try:
-                    next_square = side[-1]
+                    block = lspan[-1]
                 except IndexError:
-                    break
+                    lspan.append([color, 1])
+                else:
+                    if block[0] == color:
+                        block[1] += 1
+                    else:
+                        lspan.append([color, 1])
 
-                if next_square != init_scan:
-                    break
+                # pull next color from the right
+                try:
+                    block = rspan[-1]
+                except IndexError:
+                    scan = 0
+                else:
+                    scan = block[0]
+
+                    if block[1] < 2:
+                        rspan.pop()
+                    else:
+                        block[1] -= 1
+
+                head += 1
+
+                stepped = 1
+
+            else:
+                # push new color to the right
+                try:
+                    block = rspan[-1]
+                except IndexError:
+                    rspan.append([color, 1])
+                else:
+                    if block[0] == color:
+                        block[1] += 1
+                    else:
+                        rspan.append([color, 1])
+
+                # pull next color from the left
+                try:
+                    block = lspan[-1]
+                except IndexError:
+                    scan = 0
+                else:
+                    scan = block[0]
+
+                    if block[1] < 2:
+                        lspan.pop()
+                    else:
+                        block[1] -= 1
+
+                if head + init == 0:
+                    init += 1
+
+                head -= 1
+
+                stepped = 1
 
             state = next_state
 
