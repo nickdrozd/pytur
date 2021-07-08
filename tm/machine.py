@@ -164,25 +164,55 @@ class Machine:
             while scan == init_scan:
                 if shift:
                     # push new color to the left
-                    lspan.append(color)
+                    try:
+                        block = lspan[-1]
+                    except IndexError:
+                        lspan.append([color, 1])
+                    else:
+                        if block[0] == color:
+                            block[1] += 1
+                        else:
+                            lspan.append([color, 1])
 
                     # pull next color from the right
                     try:
-                        scan = rspan.pop()
+                        block = rspan[-1]
                     except IndexError:
                         scan = 0
+                    else:
+                        scan = block[0]
+
+                        if block[1] < 2:
+                            rspan.pop()
+                        else:
+                            block[1] -= 1
 
                     head += 1
 
                 else:
                     # push new color to the right
-                    rspan.append(color)
+                    try:
+                        block = rspan[-1]
+                    except IndexError:
+                        rspan.append([color, 1])
+                    else:
+                        if block[0] == color:
+                            block[1] += 1
+                        else:
+                            rspan.append([color, 1])
 
                     # pull next color from the left
                     try:
-                        scan = lspan.pop()
+                        block = lspan[-1]
                     except IndexError:
                         scan = 0
+                    else:
+                        scan = block[0]
+
+                        if block[1] < 2:
+                            lspan.pop()
+                        else:
+                            block[1] -= 1
 
                     if head + init == 0:
                         init += 1
